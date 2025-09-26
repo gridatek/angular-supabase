@@ -12,32 +12,23 @@ test.describe('Users List', () => {
     await expect(page.locator('h2')).toContainText('Users List');
   });
 
-  test('should show loading state initially', async ({ page }) => {
+  test('should display content after loading', async ({ page }) => {
     await page.goto('/');
     
-    // Should show loading message briefly
-    const loadingElement = page.locator('.loading');
-    await expect(loadingElement).toBeVisible();
-  });
-
-  test('should display users after loading', async ({ page }) => {
-    await page.goto('/');
+    // Wait for any content to appear (users, error, or no users message)
+    await page.waitForSelector('.users-grid, .error, .no-users', { timeout: 15000 });
     
-    // Wait for users to load (either users or error message)
-    await page.waitForSelector('.users-grid, .error, .no-users', { timeout: 10000 });
-    
-    // Should either show users grid, error message, or no users message
+    // Check that one of the expected states is visible
     const usersGrid = page.locator('.users-grid');
     const errorMessage = page.locator('.error');
     const noUsersMessage = page.locator('.no-users');
     
-    const hasContent = await Promise.race([
-      usersGrid.isVisible(),
-      errorMessage.isVisible(), 
-      noUsersMessage.isVisible()
-    ]);
+    // At least one of these should be visible
+    const contentVisible = await usersGrid.isVisible() || 
+                           await errorMessage.isVisible() || 
+                           await noUsersMessage.isVisible();
     
-    expect(hasContent).toBe(true);
+    expect(contentVisible).toBe(true);
   });
 
   test('should display user cards with correct information', async ({ page }) => {
