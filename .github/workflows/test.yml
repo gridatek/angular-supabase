@@ -38,10 +38,9 @@ jobs:
     - name: Install dependencies (root)
       run: npm install
 
-    - name: Install Supabase CLI
+    - name: Verify Supabase CLI
       run: |
-        npm install -g @supabase/cli
-        supabase --version
+        npx supabase --version
 
     - name: Install frontend dependencies
       run: |
@@ -55,13 +54,13 @@ jobs:
 
     - name: Start Supabase local development
       run: |
-        supabase start --exclude=edge-runtime,studio,storage-api,imgproxy,inbucket
+        npx supabase start --exclude=edge-runtime,studio,storage-api,imgproxy,inbucket
       env:
         SUPABASE_DB_PORT: 5432
 
     - name: Run database migrations and seed
       run: |
-        supabase db reset --linked=false
+        npx supabase db reset --linked=false
 
     - name: Build Angular application
       run: |
@@ -84,5 +83,5 @@ jobs:
         retention-days: 30
         
     - name: Stop Supabase
-      run: supabase stop
+      run: npx supabase stop
       if: always()
