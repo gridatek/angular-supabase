@@ -5,7 +5,7 @@ test.describe('Users List', () => {
     await page.goto('/');
     
     // Check page title and header
-    await expect(page).toHaveTitle(/frontend/);
+    await expect(page).toHaveTitle(/Frontend/);
     await expect(page.locator('h1')).toContainText('Angular - Supabase Demo');
     
     // Check users section is present
