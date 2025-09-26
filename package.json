@@ -11,9 +11,9 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
     "db:seed": "supabase db reset --linked=false",
-    "frontend:install": "cd apps/frontend && npm ci",
-    "frontend:build": "cd apps/frontend && npm run build",
-    "frontend:e2e": "cd apps/frontend && npm run e2e",
+    "frontend:install": "npm install --workspace=apps/frontend",
+    "frontend:build": "npm run build --workspace=apps/frontend",
+    "frontend:e2e": "npm run e2e --workspace=apps/frontend",
     "test:e2e": "npm run db:start && npm run db:seed && npm run frontend:build && npm run frontend:e2e && npm run db:stop"
   },
   "devDependencies": {

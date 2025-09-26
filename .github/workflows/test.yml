@@ -43,34 +43,25 @@ jobs:
         npx supabase --version
 
     - name: Install frontend dependencies
-      run: |
-        cd apps/frontend
-        npm install
+      run: npm run frontend:install
 
     - name: Install Playwright Browsers
-      run: |
-        cd apps/frontend
-        npx playwright install --with-deps
+      run: npx playwright install --with-deps
+      working-directory: apps/frontend
 
     - name: Start Supabase local development
-      run: |
-        npx supabase start --exclude=edge-runtime,studio,storage-api,imgproxy,inbucket
+      run: npm run db:start
       env:
         SUPABASE_DB_PORT: 5432
 
     - name: Run database migrations and seed
-      run: |
-        npx supabase db reset --linked=false
+      run: npm run db:seed
 
     - name: Build Angular application
-      run: |
-        cd apps/frontend
-        npm run build
+      run: npm run frontend:build
 
     - name: Run Playwright tests
-      run: |
-        cd apps/frontend
-        npm run e2e
+      run: npm run frontend:e2e
       env:
         CI: true
 
@@ -83,5 +74,5 @@ jobs:
         retention-days: 30
         
     - name: Stop Supabase
-      run: npx supabase stop
+      run: npm run db:stop
       if: always()
