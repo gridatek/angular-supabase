@@ -1,0 +1,22 @@
+{
+  "name": "angular-supabase-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase migration up",
+    "db:seed": "supabase db reset --linked=false",
+    "frontend:install": "cd apps/frontend && npm ci",
+    "frontend:build": "cd apps/frontend && npm run build",
+    "frontend:e2e": "cd apps/frontend && npm run e2e",
+    "test:e2e": "npm run db:start && npm run db:seed && npm run frontend:build && npm run frontend:e2e && npm run db:stop"
+  },
+  "devDependencies": {
+    "supabase": "^2.45.5"
+  }
+}
