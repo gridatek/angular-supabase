@@ -10,7 +10,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
-    "db:seed": "supabase db reset --linked=false",
+    "db:seed": "supabase db reset",
     "frontend:install": "npm install --workspace=apps/frontend",
     "frontend:build": "npm run build --workspace=apps/frontend",
     "frontend:e2e": "npm run e2e --workspace=apps/frontend",
