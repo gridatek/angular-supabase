@@ -36,7 +36,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies (root)
-      run: npm ci
+      run: npm install
 
     - name: Install Supabase CLI
       run: |
@@ -46,7 +46,7 @@ jobs:
     - name: Install frontend dependencies
       run: |
         cd apps/frontend
-        npm ci
+        npm install
 
     - name: Install Playwright Browsers
       run: |
