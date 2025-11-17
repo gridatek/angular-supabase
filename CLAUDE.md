@@ -207,10 +207,13 @@ The frontend includes a complete authentication system integrated with Supabase 
 - Automatically syncs auth state with Supabase session changes
 - Exposes reactive state: `authState()` with user, session, and loading status
 
-**Environment Configuration**:
+**Configuration** (`frontend/public/config.json`):
 
-- Development: `frontend/src/environments/environment.ts` (http://localhost:54321)
-- Production: `frontend/src/environments/environment.prod.ts` (your Supabase project URL)
+- Runtime configuration loaded via `ConfigService` using `APP_INITIALIZER`
+- File is NOT committed to Git (in `.gitignore`)
+- Generated automatically in CI/CD via GitHub Actions
+- For local development: Copy `config.json.example` to `config.json` and update values
+- Get Supabase URL and anon key from `npm run status`
 
 **Route Configuration** (`frontend/src/app/app.routes.ts`):
 
@@ -310,6 +313,7 @@ All Edge Functions:
 - Auto-serves Edge Functions during tests
 - Tests login with seeded users
 - Validates admin permissions
+- **Automatic config.json generation** from Supabase status (injects URL and anon key)
 - **Frontend E2E tests** with Playwright
 - Uploads test reports and screenshots as artifacts (30-day retention)
 
@@ -335,7 +339,23 @@ All Edge Functions:
    npm run dev
    ```
 
-3. **Start Frontend:**
+3. **Configure Frontend:**
+
+   ```bash
+   # Copy example config
+   cd frontend
+   cp public/config.json.example public/config.json
+
+   # Get Supabase credentials
+   cd ..
+   npm run status
+
+   # Update frontend/public/config.json with:
+   # - url: API URL from status output
+   # - anonKey: anon key from status output
+   ```
+
+4. **Start Frontend:**
    ```bash
    # From frontend/ directory
    cd frontend
@@ -471,16 +491,28 @@ All backend services are accessible through port 54321 (Kong gateway)
 
 ### Connecting Frontend to Backend
 
-In your Angular app, use these environment values:
+The frontend uses runtime configuration loaded from `frontend/public/config.json`:
 
-```typescript
-export const environment = {
-  supabaseUrl: 'http://localhost:54321',
-  supabaseKey: '<ANON_KEY from supabase status>',
-};
-```
+1. **For Local Development:**
 
-Get the anon key by running `npm run status` in the root directory.
+   ```bash
+   # Copy the example file
+   cd frontend
+   cp public/config.json.example public/config.json
+
+   # Get credentials from Supabase
+   cd ..
+   npm run status
+
+   # Edit frontend/public/config.json with the API URL and anon key
+   ```
+
+2. **For CI/CD:**
+   - The config.json is automatically generated in GitHub Actions
+   - Extracts URL and anon key from `supabase status` output
+   - Injected before running E2E tests
+
+The `ConfigService` loads this configuration at app startup via `APP_INITIALIZER`.
 
 ## Troubleshooting
 

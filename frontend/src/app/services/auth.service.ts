@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config.service';
 
 export interface AuthState {
   user: User | null;
@@ -22,8 +22,12 @@ export class AuthService {
     loading: true,
   });
 
-  constructor(private router: Router) {
-    this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey);
+  constructor(
+    private router: Router,
+    private configService: ConfigService
+  ) {
+    const config = this.configService.getConfig();
+    this.supabase = createClient(config.supabase.url, config.supabase.anonKey);
     this.initializeAuth();
   }
 

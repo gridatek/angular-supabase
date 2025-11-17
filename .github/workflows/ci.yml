@@ -278,6 +278,34 @@ jobs:
           cd frontend
           npx playwright install --with-deps chromium
 
+      - name: Generate frontend config
+        shell: bash
+        run: |
+          echo "Generating config.json with Supabase credentials..."
+          STATUS_OUTPUT=$(supabase status)
+
+          # Extract values
+          API_URL=$(echo "$STATUS_OUTPUT" | grep -i "API URL" | head -n1 | awk '{print $NF}')
+          ANON_KEY=$(echo "$STATUS_OUTPUT" | grep -i "anon key\|publishable" | head -n1 | awk '{print $NF}')
+
+          # Fallback
+          if [ -z "$API_URL" ]; then
+            API_URL="http://127.0.0.1:54321"
+          fi
+
+          # Create config.json
+          cat > frontend/public/config.json <<EOF
+          {
+            "supabase": {
+              "url": "$API_URL",
+              "anonKey": "$ANON_KEY"
+            }
+          }
+          EOF
+
+          echo "✅ Generated frontend/public/config.json"
+          cat frontend/public/config.json
+
       - name: Run frontend E2E tests
         shell: bash
         run: |

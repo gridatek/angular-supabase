@@ -43,6 +43,9 @@ __screenshots__/
 /playwright-report/
 /playwright/.cache/
 
+# Environment config (generated at runtime)
+/public/config.json
+
 # System files
 .DS_Store
 Thumbs.db
