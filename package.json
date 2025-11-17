@@ -2,6 +2,10 @@
   "name": "supabase-template",
   "version": "0.0.0",
   "description": "Modern Supabase template with migrations & CI/CD",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "supabase start",
     "stop": "supabase stop",
@@ -14,7 +18,13 @@
     "logs": "docker logs supabase_db_supabase-template --tail 100",
     "shell": "supabase db shell",
     "types": "supabase gen types typescript --local > types/database.types.ts",
-    "link": "supabase link"
+    "link": "supabase link",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "frontend:dev": "npm run start --workspace=frontend",
+    "frontend:build": "npm run build --workspace=frontend",
+    "frontend:test": "npm run test --workspace=frontend",
+    "frontend:e2e": "npm run e2e --workspace=frontend"
   },
   "keywords": [
     "supabase",
@@ -22,5 +32,8 @@
     "template"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }

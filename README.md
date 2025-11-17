@@ -35,9 +35,14 @@ project/
 ```bash
 git clone https://github.com/gridatek/supabase.git
 cd supabase
-npm run dev
+npm install  # Install dependencies (uses npm workspaces)
+npm run dev  # Start Supabase backend
 
-# That's it! Supabase is running on all platforms
+# Start frontend (in another terminal)
+npm run frontend:dev
+# Or: cd frontend && npm start
+
+# That's it! Backend and frontend are running
 ```
 
 ### Seed Test Data
