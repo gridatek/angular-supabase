@@ -265,7 +265,7 @@ jobs:
         shell: bash
         run: |
           echo "Installing all dependencies (root + workspaces)..."
-          npm ci
+          npm install
 
       - name: Install Playwright browsers
         shell: bash
