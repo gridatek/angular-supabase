@@ -224,6 +224,7 @@ All Edge Functions:
 - Seeds test data with proper auth schema
 - Waits for services to be ready after reset
 - Tests Edge Functions with Deno
+- Runs frontend E2E tests with Playwright
 - Comprehensive error logging and diagnostics
 
 **Key CI Features:**
@@ -233,6 +234,8 @@ All Edge Functions:
 - Auto-serves Edge Functions during tests
 - Tests login with seeded users
 - Validates admin permissions
+- **Frontend E2E tests** with Playwright
+- Uploads test reports and screenshots as artifacts (30-day retention)
 
 **`.github/workflows/deploy.yml`:**
 - Deploys migrations to production
@@ -408,6 +411,14 @@ If CI fails:
 2. **Edge Functions not responding** - Check edge-runtime container logs
 3. **Environment variable parsing** - Uses case-insensitive grep + fallbacks
 4. **Database reset timing** - Health checks ensure services are ready
+5. **E2E tests failing** - Download artifacts from GitHub Actions (playwright-report, e2e-test-results)
+
+**Viewing E2E Test Results in CI:**
+1. Go to Actions tab in GitHub
+2. Click on the failed workflow run
+3. Scroll to "Artifacts" section at the bottom
+4. Download "playwright-report" to view HTML report locally
+5. Download "e2e-test-results" for screenshots and traces
 
 View detailed logs in GitHub Actions for diagnostics.
 
