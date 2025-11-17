@@ -65,7 +65,7 @@ jobs:
 
           # Verify database is ready
           echo "Checking database..."
-          docker exec supabase_db_supabase-template psql -U postgres -d postgres -c "SELECT 1" >/dev/null || {
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT 1" >/dev/null || {
             echo "❌ Database not responding"
             exit 1
           }
@@ -80,7 +80,7 @@ jobs:
             fi
             if [ $i -eq 10 ]; then
               echo "❌ Auth service not responding after 10 attempts"
-              docker logs supabase_auth_supabase-template --tail 50
+              docker logs supabase_auth_angular-supabase --tail 50
               exit 1
             fi
             echo "Waiting for auth service... attempt $i/10"
@@ -89,7 +89,7 @@ jobs:
 
           # Verify seeded users exist and can be queried
           echo "Verifying seeded data..."
-          USER_COUNT=$(docker exec supabase_db_supabase-template psql -U postgres -d postgres -t -c "SELECT COUNT(*) FROM auth.users WHERE email LIKE '%@example.com'")
+          USER_COUNT=$(docker exec supabase_db_angular-supabase psql -U postgres -d postgres -t -c "SELECT COUNT(*) FROM auth.users WHERE email LIKE '%@example.com'")
           echo "Found $USER_COUNT test users"
           if [ "$USER_COUNT" -lt 3 ]; then
             echo "❌ Expected at least 3 test users, found $USER_COUNT"
@@ -136,13 +136,13 @@ jobs:
           echo "ANON_KEY length: ${#ANON_KEY}"
 
           echo "Checking auth.users count..."
-          docker exec supabase_db_supabase-template psql -U postgres -d postgres -c "SELECT COUNT(*) as user_count FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query auth.users"
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT COUNT(*) as user_count FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query auth.users"
 
           echo "Checking profiles..."
           curl -s -H "apikey: $ANON_KEY" "$API_URL/rest/v1/profiles?select=username,is_admin" | jq '.' || echo "Failed to query profiles"
 
           echo "Checking auth.users details (email, confirmed, encrypted_password)..."
-          docker exec supabase_db_supabase-template psql -U postgres -d postgres -c "SELECT id, email, email_confirmed_at, encrypted_password IS NOT NULL as has_password, is_sso_user FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query user details"
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT id, email, email_confirmed_at, encrypted_password IS NOT NULL as has_password, is_sso_user FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query user details"
 
           echo "Testing login manually..."
           LOGIN_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST "$API_URL/auth/v1/token?grant_type=password" \
@@ -233,10 +233,10 @@ jobs:
           if [ ! -z "$TEST_EXIT_CODE" ] && [ "$TEST_EXIT_CODE" != "0" ]; then
             echo ""
             echo "Tests failed, checking database state..."
-            docker exec supabase_db_supabase-template psql -U postgres -d postgres -c "SELECT email, created_at, email_confirmed_at FROM auth.users WHERE email LIKE '%@example.com';" || echo "Could not query auth.users"
+            docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT email, created_at, email_confirmed_at FROM auth.users WHERE email LIKE '%@example.com';" || echo "Could not query auth.users"
             echo ""
             echo "Checking auth logs..."
-            docker logs supabase_auth_supabase-template 2>&1 | tail -50
+            docker logs supabase_auth_angular-supabase 2>&1 | tail -50
             echo ""
             echo "Checking edge-runtime logs..."
             docker logs $(docker ps -q -f name=edge-runtime) 2>&1 | tail -50 || echo "No edge-runtime logs available"
@@ -323,13 +323,13 @@ jobs:
           echo "=========================================="
           echo ""
           echo "--- Database Logs (last 100 lines) ---"
-          docker logs supabase_db_supabase-template --tail 100 2>&1 || echo "Could not fetch database logs"
+          docker logs supabase_db_angular-supabase --tail 100 2>&1 || echo "Could not fetch database logs"
           echo ""
           echo "--- Kong API Gateway Logs (last 50 lines) ---"
-          docker logs supabase_kong_supabase-template --tail 50 2>&1 || echo "Could not fetch API gateway logs"
+          docker logs supabase_kong_angular-supabase --tail 50 2>&1 || echo "Could not fetch API gateway logs"
           echo ""
           echo "--- Auth GoTrue Logs (last 50 lines) ---"
-          docker logs supabase_auth_supabase-template --tail 50 2>&1 || echo "Could not fetch auth logs"
+          docker logs supabase_auth_angular-supabase --tail 50 2>&1 || echo "Could not fetch auth logs"
           echo ""
           echo "=========================================="
 

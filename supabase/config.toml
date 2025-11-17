@@ -1,5 +1,5 @@
 # A string used to distinguish different Supabase projects on the same host
-project_id = "supabase-template"
+project_id = "angular-supabase"
 
 [db]
 # Port to use for the local database URL

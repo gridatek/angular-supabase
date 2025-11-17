@@ -1,4 +1,4 @@
-# Modern Supabase Setup with Docker, Migrations & GitHub Actions
+# Angular + Supabase Full-Stack Application
 
 ## Project Structure
 
@@ -35,8 +35,8 @@ project/
 ### Start in 3 Commands
 
 ```bash
-git clone https://github.com/gridatek/supabase.git
-cd supabase
+git clone <repository-url>
+cd angular-supabase
 npm install  # Install dependencies (uses npm workspaces)
 npm run dev  # Start Supabase backend
 

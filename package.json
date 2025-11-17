@@ -1,7 +1,7 @@
 {
-  "name": "supabase-template",
+  "name": "angular-supabase",
   "version": "0.0.0",
-  "description": "Modern Supabase template with migrations & CI/CD",
+  "description": "Angular + Supabase full-stack application with E2E testing & CI/CD",
   "private": true,
   "workspaces": [
     "frontend"
@@ -15,7 +15,7 @@
     "migrate:prod": "supabase db push",
     "diff": "supabase db diff",
     "status": "supabase status",
-    "logs": "docker logs supabase_db_supabase-template --tail 100",
+    "logs": "docker logs supabase_db_angular-supabase --tail 100",
     "shell": "supabase db shell",
     "types": "supabase gen types typescript --local > types/database.types.ts",
     "link": "supabase link",
@@ -28,9 +28,12 @@
     "prepare": "husky"
   },
   "keywords": [
+    "angular",
     "supabase",
     "postgres",
-    "template"
+    "playwright",
+    "e2e",
+    "fullstack"
   ],
   "author": "",
   "license": "MIT",

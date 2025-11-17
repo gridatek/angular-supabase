@@ -24,7 +24,9 @@ npm run link
 ```
 
 Follow the prompts:
-1. Enter your Supabase access token (create one at [Account Settings](https://app.supabase.com/account/tokens))
+
+1. Enter your Supabase access token (create one at
+   [Account Settings](https://app.supabase.com/account/tokens))
 2. Select your production project
 
 This creates a `.env.local` file (already gitignored).
@@ -40,6 +42,7 @@ This applies all migrations from `supabase/migrations/` to production.
 ### 4. Verify Deployment
 
 Check the Supabase Dashboard:
+
 - **Database → Tables**: Verify tables exist
 - **Database → Policies**: Check RLS policies
 - **API Docs**: Test endpoints
@@ -50,7 +53,7 @@ Check the Supabase Dashboard:
 
 ```toml
 # supabase/config.toml
-project_id = "supabase-template"
+project_id = "angular-supabase"
 
 [db]
 port = 54322
@@ -87,6 +90,7 @@ vercel
 ```
 
 **Environment Variables** (in Vercel dashboard):
+
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
@@ -106,6 +110,7 @@ netlify deploy --prod --dir=dist/frontend
 ```
 
 **Environment Variables** (in Netlify dashboard):
+
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
@@ -114,6 +119,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ### Option 3: Static Hosting
 
 Build and upload `frontend/dist/` to any static host:
+
 - AWS S3 + CloudFront
 - GitHub Pages
 - Firebase Hosting
@@ -137,11 +143,13 @@ npm run migrate:prod
 ### Backing Up Production Database
 
 Via Supabase Dashboard:
+
 1. **Database → Backups**
 2. Enable daily backups (automatic on Pro plan)
 3. Download manual backup if needed
 
 Via CLI:
+
 ```bash
 # Dump database
 supabase db dump -f backup.sql
@@ -175,6 +183,7 @@ DELETE FROM public.users;
 ```
 
 Or create a migration:
+
 ```sql
 -- supabase/migrations/00007_remove_seed_data.sql
 -- Only run in production!
@@ -203,6 +212,7 @@ Example: GitHub OAuth
    - Set callback URL: `https://your-project.supabase.co/auth/v1/callback`
 
 2. **Configure in Supabase**:
+
    ```toml
    # Update supabase/config.toml for local
    [auth.external.github]
@@ -218,6 +228,7 @@ Example: GitHub OAuth
 ### Supabase Dashboard
 
 Monitor in **Project Settings → Usage**:
+
 - API requests
 - Database size
 - Bandwidth
@@ -234,6 +245,7 @@ supabase db logs
 ### Set Up Alerts
 
 In Supabase Dashboard:
+
 1. **Settings → Billing → Usage**
 2. Set up email alerts for:
    - Database size limits
@@ -256,6 +268,7 @@ CREATE INDEX idx_users_email ON public.users(email);
 Enable in Dashboard → **Settings → Database → Connection Pooling**
 
 Use pooler URL for serverless environments:
+
 ```
 postgresql://postgres.[project-ref]:[password]@aws-0-us-west-1.pooler.supabase.com:6543/postgres
 ```
@@ -263,6 +276,7 @@ postgresql://postgres.[project-ref]:[password]@aws-0-us-west-1.pooler.supabase.c
 ### Caching
 
 Implement caching for frequently accessed data:
+
 - Browser cache (Cache-Control headers)
 - CDN caching for static assets
 - Application-level caching (Redis, Upstash)
@@ -273,11 +287,11 @@ Implement caching for frequently accessed data:
 
 As your app grows, consider upgrading:
 
-| Plan | Use Case |
-|------|----------|
-| **Free** | Development, small projects |
-| **Pro** | Production apps, $25/month |
-| **Team** | Collaborative teams |
+| Plan           | Use Case                      |
+| -------------- | ----------------------------- |
+| **Free**       | Development, small projects   |
+| **Pro**        | Production apps, $25/month    |
+| **Team**       | Collaborative teams           |
 | **Enterprise** | Custom SLA, dedicated support |
 
 ### Database Scaling
@@ -330,6 +344,7 @@ jobs:
 ```
 
 **Setup**:
+
 1. Add secrets to GitHub repo
 2. Push to main or create a tag
 3. Workflow runs automatically
@@ -385,6 +400,7 @@ curl https://your-project.supabase.co/rest/v1/users \
 ### Smoke Tests
 
 After deployment:
+
 1. Test user registration
 2. Test login/logout
 3. Test data queries
