@@ -24,7 +24,8 @@
     "frontend:dev": "npm run start --workspace=frontend",
     "frontend:build": "npm run build --workspace=frontend",
     "frontend:test": "npm run test --workspace=frontend",
-    "frontend:e2e": "npm run e2e --workspace=frontend"
+    "frontend:e2e": "npm run e2e --workspace=frontend",
+    "prepare": "husky"
   },
   "keywords": [
     "supabase",
@@ -33,7 +34,19 @@
   ],
   "author": "",
   "license": "MIT",
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json,css,scss,md,html}": [
+      "prettier --write"
+    ],
+    "*.sql": [
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "prettier": "^3.6.2"
   }
 }
