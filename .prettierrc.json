@@ -20,12 +20,6 @@
       "options": {
         "proseWrap": "always"
       }
-    },
-    {
-      "files": "*.sql",
-      "options": {
-        "parser": "sql"
-      }
     }
   ]
 }
