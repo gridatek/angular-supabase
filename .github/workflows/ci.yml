@@ -185,6 +185,35 @@ jobs:
             fi
           done
 
+          echo ""
+          echo "Verifying posts Edge Functions..."
+
+          # Test posts-create function
+          POSTS_CREATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-create \
+            -H "Content-Type: application/json" \
+            -d '{}' 2>&1)
+          POSTS_CREATE_CODE=$(echo "$POSTS_CREATE_RESPONSE" | tail -n 1 | cut -d: -f2)
+
+          if [ "$POSTS_CREATE_CODE" == "401" ] || [ "$POSTS_CREATE_CODE" == "400" ]; then
+            echo "✅ posts-create function is accessible (HTTP $POSTS_CREATE_CODE)"
+          else
+            echo "⚠️  posts-create function returned unexpected code: $POSTS_CREATE_CODE"
+            echo "$POSTS_CREATE_RESPONSE" | head -n -1
+          fi
+
+          # Test posts-update function
+          POSTS_UPDATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-update \
+            -H "Content-Type: application/json" \
+            -d '{}' 2>&1)
+          POSTS_UPDATE_CODE=$(echo "$POSTS_UPDATE_RESPONSE" | tail -n 1 | cut -d: -f2)
+
+          if [ "$POSTS_UPDATE_CODE" == "401" ] || [ "$POSTS_UPDATE_CODE" == "400" ]; then
+            echo "✅ posts-update function is accessible (HTTP $POSTS_UPDATE_CODE)"
+          else
+            echo "⚠️  posts-update function returned unexpected code: $POSTS_UPDATE_CODE"
+            echo "$POSTS_UPDATE_RESPONSE" | head -n -1
+          fi
+
       - name: Test Edge Functions
         shell: bash
         run: |
