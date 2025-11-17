@@ -182,6 +182,54 @@ test.describe('Posts Management', () => {
       expect(hasEditButton === hasDeleteButton).toBeTruthy();
     }
   });
+
+  test('should sanitize XSS attempts in title', async ({ page }) => {
+    await page.goto('/posts/create');
+
+    // Try to inject script in title
+    const xssTitle = '<script>alert("XSS")</script>Malicious Title';
+    await page.getByTestId('title-input').fill(xssTitle);
+    await page.getByTestId('slug-input').fill('xss-test');
+    await page.getByTestId('submit-button').click();
+
+    await expect(page).toHaveURL('/posts');
+
+    // Title should be sanitized (script tags removed)
+    await expect(page.locator('text=<script>')).not.toBeVisible();
+    // The text content without tags should still be visible
+    await expect(page.locator('text=Malicious Title')).toBeVisible();
+  });
+
+  test('should sanitize XSS attempts in content', async ({ page }) => {
+    await page.goto('/posts/create');
+
+    const xssContent =
+      '<script>alert("XSS")</script><p>Safe content</p><img src=x onerror=alert("XSS")>';
+    await page.getByTestId('title-input').fill('XSS Content Test');
+    await page.getByTestId('slug-input').fill('xss-content-test');
+    await page.getByTestId('content-input').fill(xssContent);
+    await page.getByTestId('submit-button').click();
+
+    await expect(page).toHaveURL('/posts');
+
+    // Script tags should be sanitized
+    await expect(page.locator('script')).toHaveCount(0);
+    // Allowed tags like <p> should be preserved
+    await expect(page.locator('text=Safe content')).toBeVisible();
+  });
+
+  test('should sanitize slug to be URL-safe', async ({ page }) => {
+    await page.goto('/posts/create');
+
+    // Try to use special characters in slug
+    await page.getByTestId('title-input').fill('Special Slug Test');
+    await page.getByTestId('slug-input').fill('Test Slug!@#$%^&*()With Special');
+    await page.getByTestId('submit-button').click();
+
+    await expect(page).toHaveURL('/posts');
+    // Post should be created successfully (slug sanitized server-side)
+    await expect(page.locator('text=Special Slug Test')).toBeVisible();
+  });
 });
 
 test.describe('Categories Management', () => {

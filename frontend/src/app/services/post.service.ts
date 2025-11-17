@@ -88,68 +88,65 @@ export class PostService {
   }
 
   /**
-   * Create a new post
+   * Create a new post (server-side sanitization via Edge Function)
    */
   async createPost(request: CreatePostRequest): Promise<Post> {
     const user = this.authService.getCurrentUser();
     if (!user) throw new Error('No authenticated user');
 
     const supabase = this.getSupabaseClient();
+    const { data: sessionData } = await supabase.auth.getSession();
 
-    const { data: post, error: postError } = await supabase
-      .from('posts')
-      .insert({
-        user_id: user.id,
-        title: request.title,
-        content: request.content || null,
-        slug: request.slug,
-        status: request.status || 'draft',
-        published: request.status === 'published',
-        tags: request.tags || null,
-        published_at: request.status === 'published' ? new Date().toISOString() : null,
-      })
-      .select()
-      .single();
-
-    if (postError) throw postError;
-
-    // Add categories if provided
-    if (request.category_ids && request.category_ids.length > 0) {
-      await this.updatePostCategories(post.id, request.category_ids);
+    if (!sessionData.session) {
+      throw new Error('No active session');
     }
 
-    return post;
+    const config = this.configService.getConfig();
+    const response = await fetch(`${config.supabase.url}/functions/v1/posts-create`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create post');
+    }
+
+    const result = await response.json();
+    return result.post;
   }
 
   /**
-   * Update a post
+   * Update a post (server-side sanitization via Edge Function)
    */
   async updatePost(id: string, request: UpdatePostRequest): Promise<void> {
+    const user = this.authService.getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
     const supabase = this.getSupabaseClient();
+    const { data: sessionData } = await supabase.auth.getSession();
 
-    const updateData: any = {
-      ...request,
-      updated_at: new Date().toISOString(),
-    };
-
-    if (request.status) {
-      updateData.published = request.status === 'published';
-      if (request.status === 'published' && !updateData.published_at) {
-        updateData.published_at = new Date().toISOString();
-      }
+    if (!sessionData.session) {
+      throw new Error('No active session');
     }
 
-    // Remove category_ids from update data (handled separately)
-    const categoryIds = request.category_ids;
-    delete updateData.category_ids;
+    const config = this.configService.getConfig();
+    const response = await fetch(`${config.supabase.url}/functions/v1/posts-update`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id, ...request }),
+    });
 
-    const { error } = await supabase.from('posts').update(updateData).eq('id', id);
-
-    if (error) throw error;
-
-    // Update categories if provided
-    if (categoryIds !== undefined) {
-      await this.updatePostCategories(id, categoryIds);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update post');
     }
   }
 
@@ -200,27 +197,6 @@ export class PostService {
     const { error } = await supabase.from('categories').delete().eq('id', id);
 
     if (error) throw error;
-  }
-
-  /**
-   * Update post categories
-   */
-  private async updatePostCategories(postId: string, categoryIds: string[]): Promise<void> {
-    const supabase = this.getSupabaseClient();
-
-    // Delete existing categories
-    await supabase.from('post_categories').delete().eq('post_id', postId);
-
-    // Add new categories
-    if (categoryIds.length > 0) {
-      const postCategories = categoryIds.map((categoryId) => ({
-        post_id: postId,
-        category_id: categoryId,
-      }));
-
-      const { error } = await supabase.from('post_categories').insert(postCategories);
-      if (error) throw error;
-    }
   }
 
   /**
