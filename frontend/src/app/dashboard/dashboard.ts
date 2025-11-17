@@ -18,6 +18,13 @@ import { AuthService } from '../services/auth.service';
             </div>
             <div class="flex items-center space-x-4">
               <a
+                routerLink="/profile"
+                class="text-gray-600 hover:text-gray-900"
+                data-testid="profile-link"
+              >
+                Edit Profile
+              </a>
+              <a
                 routerLink="/admin/users"
                 class="text-gray-600 hover:text-gray-900"
                 data-testid="admin-link"
