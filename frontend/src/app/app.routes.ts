@@ -43,6 +43,10 @@ export const routes: Routes = [
         path: 'users/create',
         loadComponent: () => import('./admin/user-create/user-create').then((m) => m.UserCreate),
       },
+      {
+        path: 'users/edit/:id',
+        loadComponent: () => import('./admin/user-edit/user-edit').then((m) => m.UserEdit),
+      },
     ],
   },
   {
