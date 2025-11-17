@@ -24,7 +24,7 @@ export class ConfigService {
     }
 
     this.config = await response.json();
-    return this.config;
+    return this.config!;
   }
 
   getConfig(): AppConfig {
