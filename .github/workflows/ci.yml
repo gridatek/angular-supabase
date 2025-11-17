@@ -261,6 +261,12 @@ jobs:
 
           echo "✅ All services responding and database accessible"
 
+      - name: Install root dependencies
+        shell: bash
+        run: |
+          echo "Installing root dependencies (prettier, husky, etc)..."
+          npm ci --ignore-scripts
+
       - name: Install frontend dependencies
         shell: bash
         run: |
