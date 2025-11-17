@@ -182,6 +182,63 @@ All services are managed by Supabase CLI and run in Docker automatically:
 - **Unit Testing**: Karma + Jasmine (test generation disabled by default)
 - **E2E Testing**: Playwright with Chromium
 - **Routing**: Standalone routing in `app.routes.ts`
+- **State Management**: Angular Signals for reactive state
+- **Authentication**: Supabase Auth with @supabase/supabase-js
+
+### Authentication System
+
+The frontend includes a complete authentication system integrated with Supabase Auth:
+
+**Components** (`frontend/src/app/auth/`):
+
+- **login/login.ts** - Login form with email/password
+- **signup/signup.ts** - Signup form with password confirmation
+- **forgot-password/forgot-password.ts** - Password reset request form
+
+**Protected Routes**:
+
+- **dashboard/dashboard.ts** - Protected dashboard displaying user info
+- **guards/auth-guard.ts** - Route guard protecting authenticated routes
+
+**Auth Service** (`frontend/src/app/services/auth.service.ts`):
+
+- Manages authentication state using Angular signals
+- Provides methods: `signIn()`, `signUp()`, `signOut()`, `resetPassword()`, `updatePassword()`
+- Automatically syncs auth state with Supabase session changes
+- Exposes reactive state: `authState()` with user, session, and loading status
+
+**Environment Configuration**:
+
+- Development: `frontend/src/environments/environment.ts` (http://localhost:54321)
+- Production: `frontend/src/environments/environment.prod.ts` (your Supabase project URL)
+
+**Route Configuration** (`frontend/src/app/app.routes.ts`):
+
+- `/login` - Public login page
+- `/signup` - Public signup page
+- `/forgot-password` - Public password reset page
+- `/dashboard` - Protected route (requires authentication via `authGuard`)
+- `/` - Redirects to login
+- All other routes redirect to login
+
+**E2E Tests** (`frontend/e2e/auth.spec.ts`):
+
+- Login flow validation with seeded users
+- Signup flow with new user creation
+- Password reset flow
+- Protected route access control
+- User sign-out functionality
+- Complete user journey tests
+
+**Features**:
+
+- Form validation with template-driven forms
+- Loading states during async operations
+- Error and success message handling
+- Automatic redirect after login/signup
+- Auth guard prevents unauthorized access
+- Test-friendly with `data-testid` attributes
+- Uses seeded test users (alice@example.com, password: password123)
 
 ### Database Management
 
