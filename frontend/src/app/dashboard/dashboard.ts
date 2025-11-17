@@ -1,11 +1,11 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="min-h-screen bg-gray-50">
       <nav class="bg-white shadow-sm">
@@ -16,10 +16,17 @@ import { AuthService } from '../services/auth.service';
                 Dashboard
               </h1>
             </div>
-            <div class="flex items-center">
+            <div class="flex items-center space-x-4">
+              <a
+                routerLink="/admin/users"
+                class="text-gray-600 hover:text-gray-900"
+                data-testid="admin-link"
+              >
+                Admin Panel
+              </a>
               <button
                 (click)="onSignOut()"
-                class="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 data-testid="signout-button"
               >
                 Sign out
