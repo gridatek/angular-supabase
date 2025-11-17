@@ -18,6 +18,20 @@ import { AuthService } from '../services/auth.service';
             </div>
             <div class="flex items-center space-x-4">
               <a
+                routerLink="/posts"
+                class="text-gray-600 hover:text-gray-900"
+                data-testid="posts-link"
+              >
+                Posts
+              </a>
+              <a
+                routerLink="/categories"
+                class="text-gray-600 hover:text-gray-900"
+                data-testid="categories-link"
+              >
+                Categories
+              </a>
+              <a
                 routerLink="/profile"
                 class="text-gray-600 hover:text-gray-900"
                 data-testid="profile-link"

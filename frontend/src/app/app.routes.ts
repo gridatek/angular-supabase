@@ -32,6 +32,29 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'posts',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./posts/posts').then((m) => m.Posts),
+      },
+      {
+        path: 'create',
+        loadComponent: () => import('./posts/post-form').then((m) => m.PostForm),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./posts/post-form').then((m) => m.PostForm),
+      },
+    ],
+  },
+  {
+    path: 'categories',
+    loadComponent: () => import('./categories/categories').then((m) => m.Categories),
+    canActivate: [authGuard],
+  },
+  {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     children: [
