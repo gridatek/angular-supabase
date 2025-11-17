@@ -221,17 +221,28 @@ The frontend includes a complete authentication system integrated with Supabase 
 - `/signup` - Public signup page
 - `/forgot-password` - Public password reset page
 - `/dashboard` - Protected route (requires authentication via `authGuard`)
+- `/admin/users` - Admin panel (requires `authGuard` + `adminGuard`)
+- `/admin/users/create` - Create user (admin only)
+- `/admin/users/edit/:id` - Edit user (admin only)
 - `/` - Redirects to login
 - All other routes redirect to login
 
-**E2E Tests** (`frontend/e2e/auth.spec.ts`):
+**E2E Tests**:
 
-- Login flow validation with seeded users
-- Signup flow with new user creation
-- Password reset flow
-- Protected route access control
-- User sign-out functionality
-- Complete user journey tests
+- `frontend/e2e/auth.spec.ts` - Authentication flow tests
+  - Login flow validation with seeded users
+  - Signup flow with new user creation
+  - Password reset flow
+  - Protected route access control
+  - User sign-out functionality
+  - Complete user journey tests
+- `frontend/e2e/admin.spec.ts` - Admin panel tests
+  - Admin user access and navigation
+  - User list display
+  - Create new users (regular and admin)
+  - Edit user details
+  - Delete users with confirmation
+  - Non-admin access prevention
 
 **Features**:
 
@@ -242,6 +253,56 @@ The frontend includes a complete authentication system integrated with Supabase 
 - Auth guard prevents unauthorized access
 - Test-friendly with `data-testid` attributes
 - Uses seeded test users (alice@example.com, password: password123)
+
+### Admin Panel (User Management)
+
+The frontend includes a complete admin panel for managing users, protected by admin role checking.
+
+**Components** (`frontend/src/app/admin/`):
+
+- **users/users.ts** - List all users with table view
+- **user-create/user-create.ts** - Create new users with admin checkbox
+- **user-edit/user-edit.ts** - Edit user details (email, password, username, admin role)
+
+**Admin Service** (`frontend/src/app/services/admin.service.ts`):
+
+- Calls Supabase Edge Functions with Bearer token authentication
+- Methods: `listUsers()`, `createUser()`, `updateUser()`, `deleteUser()`
+- All requests include session access token from AuthService
+- Integrates with existing Deno Edge Functions in `supabase/functions/`
+
+**Admin Guard** (`frontend/src/app/guards/admin-guard.ts`):
+
+- Checks if user is authenticated (via `authGuard`)
+- Queries `profiles.is_admin` column to verify admin role
+- Redirects non-admin users to `/dashboard`
+- Uses `@supabase/supabase-js` client with config from `ConfigService`
+
+**Edge Functions Integration**:
+
+- `admin-list-users` - Lists all users (email, created_at, last_sign_in_at)
+- `admin-create-user` - Creates users with optional admin role
+- `admin-update-user` - Updates user details (email, password, username, is_admin)
+- `admin-delete-user` - Deletes users from auth.users and profiles
+
+**Features**:
+
+- Full CRUD operations for user management
+- Table view with email, created date, last sign in
+- Create users with optional admin role
+- Edit user details with optional password update
+- Delete users with confirmation dialog
+- Protected routes accessible only to admin users (is_admin = true)
+- Error handling with user-friendly messages
+- Success notifications for operations
+- Loading states during async operations
+- All Edge Function calls properly authenticated
+
+**Admin Users**:
+
+- Alice (alice@example.com) - Admin user from seed data (is_admin = true)
+- Bob and Carol - Regular users (is_admin = false)
+- Only admin users can access `/admin/*` routes
 
 ### Database Management
 
