@@ -264,11 +264,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          echo "Installing root dependencies..."
-          npm ci
-
-          echo "Installing frontend dependencies..."
-          cd frontend
+          echo "Installing all dependencies (root + workspaces)..."
           npm ci
 
       - name: Install Playwright browsers
