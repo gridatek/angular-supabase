@@ -1,0 +1,154 @@
+name: Angular Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'supabase/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # TODO: Re-enable once docker/setup-docker-action is stable
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install Angular CLI
+        shell: bash
+        run: npm install -g @angular/cli
+
+      - name: Log versions
+        shell: bash
+        run: |
+          echo "Node version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          echo "Supabase CLI version: $(supabase --version)"
+          echo "Docker version: $(docker --version)"
+          echo "Angular CLI version: $(ng version)"
+
+      - name: Check frontend exists
+        id: check
+        shell: bash
+        run: |
+          if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⏭️ No frontend, creating Angular app for testing"
+          fi
+
+      - name: Setup Angular project
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          ng new frontend --skip-git --defaults --inline-style --inline-template --skip-tests
+          cd frontend
+          npm install @supabase/supabase-js
+          echo "Supabase JS client version: $(npm list @supabase/supabase-js --depth=0 | grep @supabase)"
+
+      - name: Configure Supabase in Angular
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          cat > frontend/src/app/app.ts << 'EOF'
+          import { Component, OnInit } from '@angular/core'
+          import { createClient } from '@supabase/supabase-js'
+
+          const supabase = createClient(
+            'http://localhost:54321',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+          )
+
+          @Component({
+            selector: 'app-root',
+            template: `
+              <h1>Supabase + Angular</h1>
+              @for (user of users; track user.id) {
+                <div>{{ user.email }}</div>
+              }
+            `,
+            styles: []
+          })
+          export class App implements OnInit {
+            users: any[] = []
+
+            async ngOnInit() {
+              const { data } = await supabase.from('profiles').select('*')
+              if (data) this.users = data
+            }
+          }
+          EOF
+
+      - name: Start Supabase
+        shell: bash
+        run: npm run dev
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        shell: bash
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: ./frontend
+        shell: bash
+        run: npm run build
+
+      - name: Test Angular app
+        if: steps.check.outputs.exists == 'true'
+        working-directory: ./frontend
+        shell: bash
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Test Supabase connection
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          # Start Angular in background
+          cd frontend
+          npx ng serve --port 4200 &
+          ANGULAR_PID=$!
+          cd ..
+
+          echo "Waiting for Angular to start..."
+          sleep 10
+
+          # Test if Angular is serving
+          curl -f http://localhost:4200 || exit 1
+
+          # Test Supabase API from root directory
+          API_URL=$(supabase status | grep "API URL" | awk '{print $3}')
+          curl -f "$API_URL/rest/v1/profiles?select=count" || exit 1
+
+          kill $ANGULAR_PID
+          echo "✅ Angular app is working and connected to Supabase"
+
+      - name: Show logs on failure
+        if: failure()
+        shell: bash
+        run: npm run logs
+
+      - name: Stop Supabase
+        if: always()
+        shell: bash
+        run: npm run stop

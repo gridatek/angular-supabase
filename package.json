@@ -1,0 +1,26 @@
+{
+  "name": "supabase-template",
+  "version": "0.0.0",
+  "description": "Modern Supabase template with migrations & CI/CD",
+  "scripts": {
+    "dev": "supabase start",
+    "stop": "supabase stop",
+    "reset": "supabase db reset",
+    "seed": "supabase db reset",
+    "migrate": "supabase db push --local",
+    "migrate:prod": "supabase db push",
+    "diff": "supabase db diff",
+    "status": "supabase status",
+    "logs": "docker logs supabase_db_supabase-template --tail 100",
+    "shell": "supabase db shell",
+    "types": "supabase gen types typescript --local > types/database.types.ts",
+    "link": "supabase link"
+  },
+  "keywords": [
+    "supabase",
+    "postgres",
+    "template"
+  ],
+  "author": "",
+  "license": "MIT"
+}
