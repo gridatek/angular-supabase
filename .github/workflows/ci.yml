@@ -272,7 +272,7 @@ jobs:
         run: |
           echo "Installing frontend dependencies..."
           cd frontend
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Install Playwright browsers
         shell: bash
