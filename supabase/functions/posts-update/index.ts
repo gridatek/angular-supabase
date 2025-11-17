@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     // Verify user owns the post
     const { data: existingPost, error: fetchError } = await supabase
       .from('posts')
-      .select('user_id')
+      .select('user_id, published_at')
       .eq('id', body.id)
       .single();
 
