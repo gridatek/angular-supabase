@@ -113,6 +113,27 @@ export class AuthService {
   }
 
   /**
+   * Wait for auth initialization to complete
+   * Returns a promise that resolves when auth state is loaded
+   */
+  async waitForAuthReady(): Promise<void> {
+    // If already loaded, return immediately
+    if (!this.authState().loading) {
+      return;
+    }
+
+    // Wait for loading to complete
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (!this.authState().loading) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
+  /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
