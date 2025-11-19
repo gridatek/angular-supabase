@@ -132,4 +132,12 @@ export class AuthService {
   getCurrentSession(): Session | null {
     return this.authState().session;
   }
+
+  /**
+   * Get the Supabase client instance
+   * Useful for making authenticated requests to Supabase
+   */
+  getSupabaseClient(): SupabaseClient {
+    return this.supabase;
+  }
 }

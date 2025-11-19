@@ -1,12 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { createClient } from '@supabase/supabase-js';
-import { ConfigService } from '../services/config.service';
 
 export const adminGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
-  const configService = inject(ConfigService);
   const router = inject(Router);
 
   // Check if user is authenticated
@@ -21,9 +18,8 @@ export const adminGuard: CanActivateFn = async (route, state) => {
     return router.createUrlTree(['/login']);
   }
 
-  // Check if user is admin by querying profiles table
-  const config = configService.getConfig();
-  const supabase = createClient(config.supabase.url, config.supabase.anonKey);
+  // Check if user is admin by querying profiles table using authenticated client
+  const supabase = authService.getSupabaseClient();
 
   const { data: profile, error } = await supabase
     .from('profiles')

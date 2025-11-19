@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { createClient } from '@supabase/supabase-js';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
 
@@ -57,16 +56,11 @@ export class PostService {
     private configService: ConfigService
   ) {}
 
-  private getSupabaseClient() {
-    const config = this.configService.getConfig();
-    return createClient(config.supabase.url, config.supabase.anonKey);
-  }
-
   /**
    * Get all posts (user's own posts or published posts)
    */
   async getPosts(): Promise<Post[]> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase
       .from('posts')
       .select('*')
@@ -80,7 +74,7 @@ export class PostService {
    * Get a single post by ID
    */
   async getPost(id: string): Promise<Post | null> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
 
     if (error) throw error;
@@ -91,13 +85,8 @@ export class PostService {
    * Create a new post (server-side sanitization via Edge Function)
    */
   async createPost(request: CreatePostRequest): Promise<Post> {
-    const user = this.authService.getCurrentUser();
-    if (!user) throw new Error('No authenticated user');
-
-    const supabase = this.getSupabaseClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-
-    if (!sessionData.session) {
+    const session = this.authService.getCurrentSession();
+    if (!session) {
       throw new Error('No active session');
     }
 
@@ -105,7 +94,7 @@ export class PostService {
     const response = await fetch(`${config.supabase.url}/functions/v1/posts-create`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${sessionData.session.access_token}`,
+        Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(request),
@@ -124,13 +113,8 @@ export class PostService {
    * Update a post (server-side sanitization via Edge Function)
    */
   async updatePost(id: string, request: UpdatePostRequest): Promise<void> {
-    const user = this.authService.getCurrentUser();
-    if (!user) throw new Error('No authenticated user');
-
-    const supabase = this.getSupabaseClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-
-    if (!sessionData.session) {
+    const session = this.authService.getCurrentSession();
+    if (!session) {
       throw new Error('No active session');
     }
 
@@ -138,7 +122,7 @@ export class PostService {
     const response = await fetch(`${config.supabase.url}/functions/v1/posts-update`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${sessionData.session.access_token}`,
+        Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ id, ...request }),
@@ -154,7 +138,7 @@ export class PostService {
    * Delete a post
    */
   async deletePost(id: string): Promise<void> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { error } = await supabase.from('posts').delete().eq('id', id);
 
     if (error) throw error;
@@ -164,7 +148,7 @@ export class PostService {
    * Get all categories
    */
   async getCategories(): Promise<Category[]> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase
       .from('categories')
       .select('*')
@@ -178,7 +162,7 @@ export class PostService {
    * Create a category
    */
   async createCategory(name: string, slug: string, description?: string): Promise<Category> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase
       .from('categories')
       .insert({ name, slug, description: description || null })
@@ -193,7 +177,7 @@ export class PostService {
    * Delete a category
    */
   async deleteCategory(id: string): Promise<void> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { error } = await supabase.from('categories').delete().eq('id', id);
 
     if (error) throw error;
@@ -203,7 +187,7 @@ export class PostService {
    * Get categories for a post
    */
   async getPostCategories(postId: string): Promise<Category[]> {
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase
       .from('post_categories')
       .select('category_id, categories(*)')

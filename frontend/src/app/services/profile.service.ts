@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { createClient } from '@supabase/supabase-js';
 import { AuthService } from './auth.service';
-import { ConfigService } from './config.service';
 
 export interface UserProfile {
   id: string;
@@ -21,15 +19,7 @@ export interface UpdateProfileRequest {
   providedIn: 'root',
 })
 export class ProfileService {
-  constructor(
-    private authService: AuthService,
-    private configService: ConfigService
-  ) {}
-
-  private getSupabaseClient() {
-    const config = this.configService.getConfig();
-    return createClient(config.supabase.url, config.supabase.anonKey);
-  }
+  constructor(private authService: AuthService) {}
 
   /**
    * Get current user's profile
@@ -40,7 +30,7 @@ export class ProfileService {
       throw new Error('No authenticated user');
     }
 
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { data, error } = await supabase
       .from('profiles')
       .select('id, username, full_name, avatar_url, updated_at')
@@ -63,7 +53,7 @@ export class ProfileService {
       throw new Error('No authenticated user');
     }
 
-    const supabase = this.getSupabaseClient();
+    const supabase = this.authService.getSupabaseClient();
     const { error } = await supabase
       .from('profiles')
       .update({
