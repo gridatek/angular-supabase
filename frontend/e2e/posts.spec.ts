@@ -5,18 +5,25 @@ const TEST_USER = {
   password: 'password123',
 };
 
-const TEST_POST = {
-  title: 'Test Post Title',
-  slug: 'test-post-slug',
-  content: 'This is a test post content.',
-  tags: 'test, playwright, e2e',
-};
+// Helper to generate unique test data
+function getUniqueTestPost() {
+  const timestamp = Date.now();
+  return {
+    title: `Test Post Title ${timestamp}`,
+    slug: `test-post-slug-${timestamp}`,
+    content: 'This is a test post content.',
+    tags: 'test, playwright, e2e',
+  };
+}
 
-const TEST_CATEGORY = {
-  name: 'Test Category',
-  slug: 'test-category',
-  description: 'A test category for E2E testing',
-};
+function getUniqueTestCategory() {
+  const timestamp = Date.now();
+  return {
+    name: `Test Category ${timestamp}`,
+    slug: `test-category-${timestamp}`,
+    description: 'A test category for E2E testing',
+  };
+}
 
 test.describe('Posts Management', () => {
   test.beforeEach(async ({ page }) => {
@@ -53,11 +60,13 @@ test.describe('Posts Management', () => {
   test('should create a draft post', async ({ page }) => {
     await page.goto('/posts/create');
 
+    const testPost = getUniqueTestPost();
+
     // Fill in post details
-    await page.getByTestId('title-input').fill(TEST_POST.title);
-    await page.getByTestId('slug-input').fill(TEST_POST.slug);
-    await page.getByTestId('content-input').fill(TEST_POST.content);
-    await page.getByTestId('tags-input').fill(TEST_POST.tags);
+    await page.getByTestId('title-input').fill(testPost.title);
+    await page.getByTestId('slug-input').fill(testPost.slug);
+    await page.getByTestId('content-input').fill(testPost.content);
+    await page.getByTestId('tags-input').fill(testPost.tags);
     await page.getByTestId('status-select').selectOption('draft');
 
     // Submit
@@ -70,7 +79,7 @@ test.describe('Posts Management', () => {
     await expect(page).toHaveURL('/posts');
 
     // Verify post appears in list
-    await expect(page.locator(`text=${TEST_POST.title}`)).toBeVisible();
+    await expect(page.locator(`text=${testPost.title}`)).toBeVisible();
   });
 
   test('should create a published post', async ({ page }) => {
@@ -252,15 +261,17 @@ test.describe('Categories Management', () => {
   test('should create a new category', async ({ page }) => {
     await page.goto('/categories');
 
-    await page.getByTestId('name-input').fill(TEST_CATEGORY.name);
-    await page.getByTestId('slug-input').fill(TEST_CATEGORY.slug);
-    await page.getByTestId('description-input').fill(TEST_CATEGORY.description);
+    const testCategory = getUniqueTestCategory();
+
+    await page.getByTestId('name-input').fill(testCategory.name);
+    await page.getByTestId('slug-input').fill(testCategory.slug);
+    await page.getByTestId('description-input').fill(testCategory.description);
     await page.getByTestId('create-button').click();
 
     await expect(page.getByTestId('success-message')).toContainText(
       'Category created successfully'
     );
-    await expect(page.locator(`text=${TEST_CATEGORY.name}`)).toBeVisible();
+    await expect(page.locator(`text=${testCategory.name}`)).toBeVisible();
   });
 
   test('should delete a category', async ({ page }) => {
@@ -317,10 +328,11 @@ test.describe('Posts with Categories', () => {
     await page.getByTestId('submit-button').click();
     await expect(page.getByTestId('dashboard-title')).toBeVisible();
 
-    // Create a test category first
+    // Create a test category first (unique per test run)
+    const testCategory = getUniqueTestCategory();
     await page.goto('/categories');
-    await page.getByTestId('name-input').fill('E2E Category');
-    await page.getByTestId('slug-input').fill('e2e-category');
+    await page.getByTestId('name-input').fill(testCategory.name);
+    await page.getByTestId('slug-input').fill(testCategory.slug);
     await page.getByTestId('create-button').click();
     await expect(page.getByTestId('success-message')).toBeVisible();
   });

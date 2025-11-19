@@ -12,6 +12,33 @@ test.describe('User Profile', () => {
     await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
   });
 
+  // Helper to create a dedicated user for password update tests
+  async function createPasswordTestUser(page: any): Promise<{ email: string; password: string }> {
+    const timestamp = Date.now();
+    const email = `pwdtest${timestamp}@example.com`;
+    const password = 'password123';
+
+    // Logout current user
+    await page.getByTestId('signout-button').click();
+    await expect(page).toHaveURL('/login', { timeout: 5000 });
+
+    // Create new user
+    await page.goto('/signup');
+    await page.getByTestId('email-input').fill(email);
+    await page.getByTestId('password-input').fill(password);
+    await page.getByTestId('confirm-password-input').fill(password);
+    await page.getByTestId('submit-button').click();
+    await expect(page).toHaveURL('/login', { timeout: 5000 });
+
+    // Login with new user
+    await page.getByTestId('email-input').fill(email);
+    await page.getByTestId('password-input').fill(password);
+    await page.getByTestId('submit-button').click();
+    await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
+
+    return { email, password };
+  }
+
   test('should display edit profile link in dashboard', async ({ page }) => {
     await expect(page.getByTestId('profile-link')).toBeVisible();
     await expect(page.getByTestId('profile-link')).toContainText('Edit Profile');
@@ -57,6 +84,9 @@ test.describe('User Profile', () => {
   });
 
   test('should update password', async ({ page }) => {
+    // Create dedicated user for password testing (avoid modifying shared test user)
+    const user = await createPasswordTestUser(page);
+
     await page.goto('/profile');
     await expect(page.getByTestId('loading')).not.toBeVisible({ timeout: 5000 });
 
@@ -80,19 +110,11 @@ test.describe('User Profile', () => {
     await expect(page).toHaveURL('/login', { timeout: 5000 });
 
     // Login with new password
-    await page.getByTestId('email-input').fill('bob@example.com');
+    await page.getByTestId('email-input').fill(user.email);
     await page.getByTestId('password-input').fill(newPassword);
     await page.getByTestId('submit-button').click();
 
     await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
-
-    // Reset password back to original for other tests
-    await page.goto('/profile');
-    await expect(page.getByTestId('loading')).not.toBeVisible({ timeout: 5000 });
-    await page.getByTestId('password-input').fill('password123');
-    await page.getByTestId('confirm-password-input').fill('password123');
-    await page.getByTestId('submit-button').click();
-    await expect(page).toHaveURL('/dashboard', { timeout: 3000 });
   });
 
   test('should show password mismatch error', async ({ page }) => {
@@ -157,6 +179,9 @@ test.describe('User Profile', () => {
   });
 
   test('should update profile with both username and password', async ({ page }) => {
+    // Create dedicated user for password testing (avoid modifying shared test user)
+    const user = await createPasswordTestUser(page);
+
     await page.goto('/profile');
     await expect(page.getByTestId('loading')).not.toBeVisible({ timeout: 5000 });
 
@@ -164,8 +189,8 @@ test.describe('User Profile', () => {
     const newPassword = `temppass${timestamp}`;
 
     // Update username, full name, and password
-    await page.getByTestId('username-input').fill(`bob_full_${timestamp}`);
-    await page.getByTestId('fullname-input').fill('Bob Complete Update');
+    await page.getByTestId('username-input').fill(`testuser_full_${timestamp}`);
+    await page.getByTestId('fullname-input').fill('Test User Complete Update');
     await page.getByTestId('password-input').fill(newPassword);
     await page.getByTestId('confirm-password-input').fill(newPassword);
 
@@ -176,18 +201,12 @@ test.describe('User Profile', () => {
     await expect(page.getByTestId('success-message')).toBeVisible();
     await expect(page).toHaveURL('/dashboard', { timeout: 3000 });
 
-    // Reset password back for other tests
+    // Verify can login with new password
     await page.getByTestId('signout-button').click();
-    await page.getByTestId('email-input').fill('bob@example.com');
+    await page.getByTestId('email-input').fill(user.email);
     await page.getByTestId('password-input').fill(newPassword);
     await page.getByTestId('submit-button').click();
     await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
-
-    await page.goto('/profile');
-    await expect(page.getByTestId('loading')).not.toBeVisible({ timeout: 5000 });
-    await page.getByTestId('password-input').fill('password123');
-    await page.getByTestId('confirm-password-input').fill('password123');
-    await page.getByTestId('submit-button').click();
   });
 
   test('should require authentication to access profile page', async ({ page }) => {
