@@ -11,6 +11,7 @@
     "stop": "supabase stop",
     "reset": "supabase db reset",
     "seed": "supabase db reset",
+    "seed:users": "deno run --allow-net --allow-env supabase/seed-users.ts",
     "migrate": "supabase db push --local",
     "migrate:prod": "supabase db push",
     "diff": "supabase db diff",

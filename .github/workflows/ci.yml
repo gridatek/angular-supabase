@@ -56,6 +56,12 @@ jobs:
       - run: npm run seed
         shell: bash
 
+      - name: Seed users via Admin API for password compatibility
+        shell: bash
+        run: |
+          echo "Seeding test users via Admin API to ensure password compatibility..."
+          npm run seed:users
+
       - name: Wait for services to be ready after reset
         shell: bash
         run: |
