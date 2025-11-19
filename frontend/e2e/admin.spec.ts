@@ -92,6 +92,9 @@ test.describe('Admin Panel', () => {
 
     await expect(page).toHaveURL('/admin/users', { timeout: 5000 });
 
+    // Wait for the new user to appear in the list
+    await expect(page.getByText(originalEmail)).toBeVisible({ timeout: 10000 });
+
     // Find the user row and click edit
     const userRow = page.getByTestId('user-row').filter({ hasText: originalEmail });
     await userRow.getByTestId('edit-user-button').click();
