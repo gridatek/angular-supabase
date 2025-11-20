@@ -75,11 +75,13 @@ test.describe('Posts Management', () => {
     // Submit
     await page.getByTestId('submit-button').click();
 
-    // Wait for success message
-    await expect(page.getByTestId('success-message')).toContainText('Post created successfully');
+    // Wait for success message (appears before redirect) - longer timeout for Edge Function
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
 
     // Should redirect to posts list
-    await expect(page).toHaveURL('/posts');
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Verify post appears in list
     await expect(page.locator(`text=${testPost.title}`)).toBeVisible();
@@ -88,15 +90,18 @@ test.describe('Posts Management', () => {
   test('should create a published post', async ({ page }) => {
     await page.goto('/posts/create');
 
-    await page.getByTestId('title-input').fill('Published Test Post');
-    await page.getByTestId('slug-input').fill('published-test-post');
+    const timestamp = Date.now();
+    await page.getByTestId('title-input').fill(`Published Test Post ${timestamp}`);
+    await page.getByTestId('slug-input').fill(`published-test-post-${timestamp}`);
     await page.getByTestId('content-input').fill('This post is published.');
     await page.getByTestId('status-select').selectOption('published');
 
     await page.getByTestId('submit-button').click();
 
-    await expect(page.getByTestId('success-message')).toContainText('Post created successfully');
-    await expect(page).toHaveURL('/posts');
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
   });
 
   test('should edit an existing post', async ({ page }) => {
@@ -109,7 +114,12 @@ test.describe('Posts Management', () => {
     await page.getByTestId('title-input').fill(originalTitle);
     await page.getByTestId('slug-input').fill(`post-to-edit-${timestamp}`);
     await page.getByTestId('submit-button').click();
-    await expect(page).toHaveURL('/posts');
+
+    // Wait for success before redirect
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Find the specific post we just created and click its edit button
     const postRow = page.getByTestId('post-item').filter({ hasText: originalTitle });
@@ -122,8 +132,10 @@ test.describe('Posts Management', () => {
     await page.getByTestId('title-input').fill(updatedTitle);
     await page.getByTestId('submit-button').click();
 
-    await expect(page.getByTestId('success-message')).toContainText('Post updated successfully');
-    await expect(page).toHaveURL('/posts');
+    await expect(page.getByTestId('success-message')).toContainText('Post updated successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
     await expect(page.locator(`text=${updatedTitle}`)).toBeVisible();
   });
 
@@ -136,7 +148,11 @@ test.describe('Posts Management', () => {
     await page.getByTestId('title-input').fill(postTitle);
     await page.getByTestId('slug-input').fill(`post-to-delete-${timestamp}`);
     await page.getByTestId('submit-button').click();
-    await expect(page).toHaveURL('/posts');
+
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Verify post exists
     await expect(page.locator(`text=${postTitle}`)).toBeVisible();
@@ -160,7 +176,11 @@ test.describe('Posts Management', () => {
     await page.getByTestId('slug-input').fill(`draft-status-test-${timestamp}`);
     await page.getByTestId('status-select').selectOption('draft');
     await page.getByTestId('submit-button').click();
-    await expect(page).toHaveURL('/posts');
+
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Find the specific post and check its status badge shows "draft"
     const postRow = page.getByTestId('post-item').filter({ hasText: postTitle });
@@ -210,12 +230,16 @@ test.describe('Posts Management', () => {
     await page.goto('/posts/create');
 
     // Try to inject script in title
+    const timestamp = Date.now();
     const xssTitle = '<script>alert("XSS")</script>Malicious Title';
     await page.getByTestId('title-input').fill(xssTitle);
-    await page.getByTestId('slug-input').fill('xss-test');
+    await page.getByTestId('slug-input').fill(`xss-test-${timestamp}`);
     await page.getByTestId('submit-button').click();
 
-    await expect(page).toHaveURL('/posts');
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Title should be sanitized (script tags removed)
     await expect(page.locator('text=<script>')).not.toBeVisible();
@@ -226,14 +250,18 @@ test.describe('Posts Management', () => {
   test('should sanitize XSS attempts in content', async ({ page }) => {
     await page.goto('/posts/create');
 
+    const timestamp = Date.now();
     const xssContent =
       '<script>alert("XSS")</script><p>Safe content</p><img src=x onerror=alert("XSS")>';
-    await page.getByTestId('title-input').fill('XSS Content Test');
-    await page.getByTestId('slug-input').fill('xss-content-test');
+    await page.getByTestId('title-input').fill(`XSS Content Test ${timestamp}`);
+    await page.getByTestId('slug-input').fill(`xss-content-test-${timestamp}`);
     await page.getByTestId('content-input').fill(xssContent);
     await page.getByTestId('submit-button').click();
 
-    await expect(page).toHaveURL('/posts');
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
 
     // Script tags should be sanitized
     await expect(page.locator('script')).toHaveCount(0);
@@ -245,13 +273,17 @@ test.describe('Posts Management', () => {
     await page.goto('/posts/create');
 
     // Try to use special characters in slug
-    await page.getByTestId('title-input').fill('Special Slug Test');
+    const timestamp = Date.now();
+    await page.getByTestId('title-input').fill(`Special Slug Test ${timestamp}`);
     await page.getByTestId('slug-input').fill('Test Slug!@#$%^&*()With Special');
     await page.getByTestId('submit-button').click();
 
-    await expect(page).toHaveURL('/posts');
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
     // Post should be created successfully (slug sanitized server-side)
-    await expect(page.locator('text=Special Slug Test')).toBeVisible();
+    await expect(page.locator(`text=Special Slug Test ${timestamp}`)).toBeVisible();
   });
 });
 
@@ -363,8 +395,9 @@ test.describe('Posts with Categories', () => {
   test('should assign category to post', async ({ page }) => {
     await page.goto('/posts/create');
 
-    await page.getByTestId('title-input').fill('Post with Category');
-    await page.getByTestId('slug-input').fill('post-with-category');
+    const timestamp = Date.now();
+    await page.getByTestId('title-input').fill(`Post with Category ${timestamp}`);
+    await page.getByTestId('slug-input').fill(`post-with-category-${timestamp}`);
 
     // Select the category checkbox (find first category checkbox)
     const categoryCheckbox = page.locator('[data-testid^="category-"]').first();
@@ -373,7 +406,10 @@ test.describe('Posts with Categories', () => {
 
     await page.getByTestId('submit-button').click();
 
-    await expect(page.getByTestId('success-message')).toContainText('Post created successfully');
+    await expect(page.getByTestId('success-message')).toContainText('Post created successfully', {
+      timeout: 10000,
+    });
+    await expect(page).toHaveURL('/posts', { timeout: 5000 });
   });
 
   test('should show link to create category if none exist', async ({ page }) => {
