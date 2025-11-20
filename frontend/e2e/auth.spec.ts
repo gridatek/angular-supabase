@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
     await page.goto('/');
   });
 
@@ -60,7 +62,8 @@ test.describe('Authentication', () => {
   });
 
   test.describe('Signup', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page, context }) => {
+      await context.clearCookies();
       await page.goto('/signup');
     });
 
@@ -117,7 +120,8 @@ test.describe('Authentication', () => {
   });
 
   test.describe('Forgot Password', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page, context }) => {
+      await context.clearCookies();
       await page.goto('/forgot-password');
     });
 

@@ -1,15 +1,32 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('User Profile', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login as bob (regular user)
-    await page.goto('/login');
-    await page.getByTestId('email-input').fill('bob@example.com');
-    await page.getByTestId('password-input').fill('password123');
-    await page.getByTestId('submit-button').click();
+  let testUser: { email: string; password: string } | null = null;
 
-    // Wait for redirect to dashboard
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage before each test for isolation
+    await context.clearCookies();
+
+    // Create a dedicated test user for profile tests to avoid modifying seeded users
+    const timestamp = Date.now();
+    const email = `profiletest${timestamp}@example.com`;
+    const password = 'password123';
+
+    // Create user via signup
+    await page.goto('/signup');
+    await page.getByTestId('email-input').fill(email);
+    await page.getByTestId('password-input').fill(password);
+    await page.getByTestId('confirm-password-input').fill(password);
+    await page.getByTestId('submit-button').click();
+    await expect(page).toHaveURL('/login', { timeout: 5000 });
+
+    // Login with the new user
+    await page.getByTestId('email-input').fill(email);
+    await page.getByTestId('password-input').fill(password);
+    await page.getByTestId('submit-button').click();
     await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
+
+    testUser = { email, password };
   });
 
   // Helper to create a dedicated user for password update tests
@@ -60,7 +77,9 @@ test.describe('User Profile', () => {
     const emailInput = page.getByTestId('email-input');
     await expect(emailInput).toBeVisible();
     await expect(emailInput).toBeDisabled();
-    await expect(emailInput).toHaveValue('bob@example.com');
+    if (testUser) {
+      await expect(emailInput).toHaveValue(testUser.email);
+    }
   });
 
   test('should update username and full name', async ({ page }) => {

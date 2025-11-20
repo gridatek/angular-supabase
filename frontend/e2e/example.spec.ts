@@ -11,7 +11,10 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Example Test Suite', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
+
     // Navigate to the app before each test
     await page.goto('/');
   });

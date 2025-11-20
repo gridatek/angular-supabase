@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Admin Panel', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
+
     // Login as admin user (alice is admin from seed data)
     await page.goto('/login');
     await page.getByTestId('email-input').fill('alice@example.com');

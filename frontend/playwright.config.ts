@@ -32,7 +32,16 @@ export default defineConfig({
 
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
+
+    /* Isolate browser contexts between tests */
+    contextOptions: {
+      ignoreHTTPSErrors: true,
+    },
   },
+
+  /* Global setup to ensure test isolation */
+  globalSetup: undefined,
+  globalTeardown: undefined,
 
   /* Configure projects for major browsers */
   projects: [

@@ -26,7 +26,10 @@ function getUniqueTestCategory() {
 }
 
 test.describe('Posts Management', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
+
     // Navigate to login page
     await page.goto('/login');
 
@@ -242,7 +245,10 @@ test.describe('Posts Management', () => {
 });
 
 test.describe('Categories Management', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
+
     await page.goto('/login');
     await page.getByTestId('email-input').fill(TEST_USER.email);
     await page.getByTestId('password-input').fill(TEST_USER.password);
@@ -321,7 +327,10 @@ test.describe('Categories Management', () => {
 });
 
 test.describe('Posts with Categories', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear cookies and storage for test isolation
+    await context.clearCookies();
+
     await page.goto('/login');
     await page.getByTestId('email-input').fill(TEST_USER.email);
     await page.getByTestId('password-input').fill(TEST_USER.password);
