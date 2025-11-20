@@ -100,60 +100,71 @@ test.describe('Posts Management', () => {
   });
 
   test('should edit an existing post', async ({ page }) => {
-    // First create a post
+    // First create a post with unique title
+    const timestamp = Date.now();
+    const originalTitle = `Post to Edit ${timestamp}`;
+    const updatedTitle = `Updated Post Title ${timestamp}`;
+
     await page.goto('/posts/create');
-    await page.getByTestId('title-input').fill('Post to Edit');
-    await page.getByTestId('slug-input').fill('post-to-edit');
+    await page.getByTestId('title-input').fill(originalTitle);
+    await page.getByTestId('slug-input').fill(`post-to-edit-${timestamp}`);
     await page.getByTestId('submit-button').click();
     await expect(page).toHaveURL('/posts');
 
-    // Find and click edit button for the post
-    const editButton = page.locator('[data-testid^="edit-post-"]').first();
-    await editButton.click();
+    // Find the specific post we just created and click its edit button
+    const postRow = page.getByTestId('post-item').filter({ hasText: originalTitle });
+    await postRow.locator('[data-testid^="edit-post-"]').click();
 
     // Wait for edit form
     await expect(page.locator('h2').filter({ hasText: 'Edit Post' })).toBeVisible();
 
     // Update title
-    await page.getByTestId('title-input').fill('Updated Post Title');
+    await page.getByTestId('title-input').fill(updatedTitle);
     await page.getByTestId('submit-button').click();
 
     await expect(page.getByTestId('success-message')).toContainText('Post updated successfully');
     await expect(page).toHaveURL('/posts');
-    await expect(page.locator('text=Updated Post Title')).toBeVisible();
+    await expect(page.locator(`text=${updatedTitle}`)).toBeVisible();
   });
 
   test('should delete a post', async ({ page }) => {
-    // Create a post to delete
+    // Create a post to delete with unique title
+    const timestamp = Date.now();
+    const postTitle = `Post to Delete ${timestamp}`;
+
     await page.goto('/posts/create');
-    await page.getByTestId('title-input').fill('Post to Delete');
-    await page.getByTestId('slug-input').fill('post-to-delete');
+    await page.getByTestId('title-input').fill(postTitle);
+    await page.getByTestId('slug-input').fill(`post-to-delete-${timestamp}`);
     await page.getByTestId('submit-button').click();
     await expect(page).toHaveURL('/posts');
 
     // Verify post exists
-    await expect(page.locator('text=Post to Delete')).toBeVisible();
+    await expect(page.locator(`text=${postTitle}`)).toBeVisible();
 
-    // Delete the post
+    // Find the specific post and delete it
     page.once('dialog', (dialog) => dialog.accept());
-    const deleteButton = page.locator('[data-testid^="delete-post-"]').first();
-    await deleteButton.click();
+    const postRow = page.getByTestId('post-item').filter({ hasText: postTitle });
+    await postRow.locator('[data-testid^="delete-post-"]').click();
 
     // Verify post is removed
-    await expect(page.locator('text=Post to Delete')).not.toBeVisible();
+    await expect(page.locator(`text=${postTitle}`)).not.toBeVisible();
   });
 
   test('should show correct post status', async ({ page }) => {
-    // Create draft post
+    // Create draft post with unique title
+    const timestamp = Date.now();
+    const postTitle = `Draft Status Test ${timestamp}`;
+
     await page.goto('/posts/create');
-    await page.getByTestId('title-input').fill('Draft Status Test');
-    await page.getByTestId('slug-input').fill('draft-status-test');
+    await page.getByTestId('title-input').fill(postTitle);
+    await page.getByTestId('slug-input').fill(`draft-status-test-${timestamp}`);
     await page.getByTestId('status-select').selectOption('draft');
     await page.getByTestId('submit-button').click();
     await expect(page).toHaveURL('/posts');
 
-    // Check status badge shows "draft"
-    const statusBadge = page.locator('[data-testid^="post-status-"]').first();
+    // Find the specific post and check its status badge shows "draft"
+    const postRow = page.getByTestId('post-item').filter({ hasText: postTitle });
+    const statusBadge = postRow.locator('[data-testid^="post-status-"]');
     await expect(statusBadge).toContainText('draft');
   });
 
@@ -283,17 +294,20 @@ test.describe('Categories Management', () => {
   test('should delete a category', async ({ page }) => {
     await page.goto('/categories');
 
-    // Create a category to delete
-    await page.getByTestId('name-input').fill('Category to Delete');
-    await page.getByTestId('slug-input').fill('category-to-delete');
+    // Create a category to delete with unique name
+    const timestamp = Date.now();
+    const categoryName = `Category to Delete ${timestamp}`;
+
+    await page.getByTestId('name-input').fill(categoryName);
+    await page.getByTestId('slug-input').fill(`category-to-delete-${timestamp}`);
     await page.getByTestId('create-button').click();
 
     await expect(page.getByTestId('success-message')).toBeVisible();
 
-    // Delete the category
+    // Find the specific category and delete it
     page.once('dialog', (dialog) => dialog.accept());
-    const deleteButton = page.locator('[data-testid^="delete-category-"]').first();
-    await deleteButton.click();
+    const categoryRow = page.getByTestId('category-item').filter({ hasText: categoryName });
+    await categoryRow.locator('[data-testid^="delete-category-"]').click();
 
     await expect(page.getByTestId('success-message')).toContainText(
       'Category deleted successfully'
